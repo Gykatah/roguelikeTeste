@@ -1,6 +1,6 @@
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
-
+console.log(Items)
 let baseWidth = 800;
 let baseHeight = 600;
 let scale = 600;
@@ -11,7 +11,28 @@ let playerX = 0
 let playerY = 0
 let cameraX = 0
 let cameraY = 0
+let keys = []
+let isInvOpen = false;
 let inventory = [
+    'healPotion',
+    'daibo',
+    'healPotion',
+    'healPotion',
+    'helmet',
+    'knife',
+    'helmet',
+    'knife',
+    'helmet',
+    'knife',
+    'helmet',
+    'knife',
+    'helmet',
+    'knife',
+    'helmet',
+    'knife',
+    'helmet',
+    'knife',
+    'helmet',
     'knife',
     'helmet',
     'knife',
@@ -29,10 +50,11 @@ function resize(){
     canvas.height = baseHeight * scale;
 }
 window.addEventListener('resize', resize);
-
+let playerIndex = Sticks.findIndex(item => item.isPlayer == true)
 function draw(){
     cameraX = playerX-baseWidth/2
     cameraY = playerY-baseHeight/2
+    playerIndex = Sticks.findIndex(item => item.isPlayer == true)
     tick++
     tick>100?tick=0:'';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -40,17 +62,7 @@ function draw(){
     ctx.scale(scale, scale);
     ctx.beginPath();
     ctx.fillStyle = 'white';
-    // ctx.fillRect(playerX-cameraX,playerY-cameraY,1,1)
-    ctx.fillRect(104,550,600,50)
-    for(let i = 0;i<12;i++){
-        ctx.fillStyle = 'black';
-        ctx.fillRect(110+(i*49),551,48,48)
-        if(Items[inventory[i]]){
-            ctx.fillStyle = 'white';
-            ctx.font = '12px Arial';
-            ctx.fillText(Items[inventory[i]].name, 115+(i*49) , 580);
-        }
-    }
+
     ctx.fillRect(0-cameraX,0-cameraY,limiteX,1)
     ctx.fillRect(0-cameraX,limiteY-cameraY,limiteX,1)
     ctx.fillRect(0-cameraX,0-cameraY,1,limiteY)
@@ -88,7 +100,7 @@ function draw(){
             }
         }
         
-        if(stick )
+
         ctx.fillStyle = 'white';
         ctx.font = '12px Arial';
         let stickPosX = stick.x-cameraX-6
@@ -110,21 +122,89 @@ function draw(){
             ctx.fillText(stick.isMoving==2?' '+ItemsHand[stick.hand].text:''+ItemsHand[stick.hand].text, stickPosX , legPos );
         }
 
-        ctx.fillText(stick.life+'❤', stick.x-cameraX , stick.y+20-cameraY );
+        ctx.fillText(Math.floor(stick.life)+'❤', stick.x-cameraX , stick.y+20-cameraY );
 
     })
-
+    Spells.forEach((e)=>{
+        ctx.fillStyle = 'white';
+        ctx.font = '12px Arial';
+        ctx.fillText(e.sprite, e.x-cameraX , e.y-cameraY);
+    })
     ctx.fillStyle = 'white';
     ctx.font = '24px Arial';
     ctx.fillText('100$', 0 , 20);
     ctx.fillText('25p', 0 , 42);
-
+    ctx.fillStyle = 'white';
+    ctx.fillRect(104,550,600,50)
+    for(let i = 0;i<12;i++){
+        ctx.fillStyle = 'black';
+        ctx.fillRect(110+(i*49),551,48,48)
+        if(Items[inventory[i]]){
+            ctx.fillStyle = 'white';
+            ctx.font = '12px Arial';
+            ctx.fillText(Items[inventory[i]].name, 115+(i*49) , 580);
+        }else if(inventory[i]!=''){
+            ctx.fillStyle = 'red';
+            ctx.font = '12px Arial';
+            ctx.fillText('???', 115+(i*49) , 580);
+        }
+    }
+    if(isInvOpen){
+        ctx.fillStyle = 'white';
+        ctx.fillRect(104,100,600,400)
+        for(let i = 7;i<35;i++){
+            let lineNumber = i%7
+            let lineCount = Math.floor(i/7)-1
+            ctx.fillStyle = 'black';
+            ctx.fillRect(300+(lineNumber*49),110+(lineCount*49),48,48)
+            if(Items[inventory[i]]){
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                ctx.fillText(Items[inventory[i]].name, 305+(lineNumber*49) , 140+(lineCount*49));
+            }
+        }
+        for(let i = 0;i<3;i++){
+            ctx.fillStyle = 'black';
+            ctx.fillRect(110,110+(i*49),48,48)
+            if(Items[inventory[i]]){
+                ctx.fillStyle = 'white';
+                ctx.font = '12px Arial';
+                let equipamentos = ['','','']
+                Sticks.forEach((stick)=>{
+                    if(stick.isPlayer==true){
+                        equipamentos[0]=stick.head;
+                        equipamentos[1]=stick.chest;
+                        equipamentos[2]=stick.hand;
+                    }})
+                    ctx.fillText(equipamentos[i], 115, 140+(i*49));
+                }
+            }
+        }
     
     ctx.restore()
 }
 FirstStick = null
 
 function stickMove(){
+
+    Spells.forEach((Spell)=>{
+        Spell.lifeTimeTicks++
+        if(Spell.lifeTimeTicks>Spell.lifeTime){
+            Spells.splice(Spells.indexOf(Spell),1);
+        }
+        if(Spell.targetX!=''&&Spell.targetY!=''){
+            const dx = Spell.targetX - Spell.x;
+            const dy = Spell.targetY - Spell.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const directionX = dx / distance;
+            const directionY = dy / distance;
+            Spell.setDis(directionX,directionY)
+            Spell.goTo('','',Spell.speed)
+        }else if(Spell.dx!=''&&Spell.dy!=''){
+            Spell.x += Spell.dx * Spell.speed;
+            Spell.y += Spell.dy * Spell.speed;
+        }
+    })
     Sticks.forEach((Stick)=>{
         const dx = Stick.targetX - Stick.x;
         const dy = Stick.targetY - Stick.y;
@@ -132,23 +212,39 @@ function stickMove(){
         let distanceLimite = 20
         if(Stick.isPlayer){
             distanceLimite = 5
-        }
-            
-        if (distance > distanceLimite) {
-            const directionX = dx / distance;
-            const directionY = dy / distance;
-            Stick.isMoving==0?Stick.isMoving = 2:''
-            Stick.x += directionX * Stick.speed;
-            Stick.y += directionY * Stick.speed;
-        } else {
-            if(Stick.isPlayer){
-                Stick.isMoving = 0
-                Stick.x = Stick.targetX;
-                Stick.y = Stick.targetY;
-            }else if(Stick.isFollowPlayer){
-                console.log('damage', distance)
+            if(keys['a']==true||keys['s']==true||keys['w']==true||keys['d']==true){
+                Stick.isMoving==0?Stick.isMoving = 2:''
+            }else{
+                Stick.isMoving=0
+            }
+            if(keys['a']==true){
+                Stick.x -= Stick.speed
+                
+            }
+            if(keys['d']==true){
+                Stick.x += Stick.speed
+            }
+            if(keys['w']==true){
+                Stick.y -= Stick.speed
+            }
+            if(keys['s']==true){
+                Stick.y += Stick.speed
+            }
+        }else{
+            if (distance > distanceLimite) {
+                const directionX = dx / distance;
+                const directionY = dy / distance;
+                Stick.isMoving==0?Stick.isMoving = 2:''
+                Stick.x += directionX * Stick.speed;
+                Stick.y += directionY * Stick.speed;
+            } else {
+                if(Stick.isFollowPlayer){
+                    Sticks[playerIndex].life-=0.05
+                    console.log('damage', distance)
+                }
             }
         }
+            
     })
 }
 
@@ -162,44 +258,63 @@ function checkItemClick(x, y) {
         if (x >= itemX && x <= itemX + itemWidth && y >= itemY && y <= itemY + itemHeight) {
             let item = Items[inventory[i]]
             if (item) {
-                console.log(item);
-                if(item.pos=='hand'){
-                    Sticks.forEach((stick)=>{
-                        if(stick.isPlayer){
-                            if(stick.hand==''){
-                                stick.hand = item.name;
+                    if(item.function!=null&&Sticks[playerIndex].isPlayer){
+                        item.function(Sticks[playerIndex])
+                        if(item.consumable){
+                            inventory[i] = ''
+                        }
+                    }
+                    if(item.pos=='hand'){
+                        if(Sticks[playerIndex].isPlayer){
+                            if(Sticks[playerIndex].hand==''){
+                                Sticks[playerIndex].hand = item.name;
                                 inventory[i] = ''
                             }
-                            return
+                            return true
                         }
-                    })
-                }
-                if(item.pos=='chest'){
-                    Sticks.forEach((stick)=>{
-                        if(stick.isPlayer){
-                            if(stick.chest==''){
-                                stick.chest = item.name;
-                                inventory[i] = ''
+                    }
+                    if(item.pos=='chest'){
+                            if(Sticks[playerIndex].isPlayer){
+                                if(Sticks[playerIndex].chest==''){
+                                    Sticks[playerIndex].chest = item.name;
+                                    inventory[i] = ''
+                                }
+                                return true
                             }
-                            return
-                        }
-                    })
-                }
-                if(item.pos=='head'){
-                    Sticks.forEach((stick)=>{
-                        if(stick.isPlayer){
-                            if(stick.head==''){
-                                stick.head = item.name;
-                                inventory[i] = ''
+                    }
+                    if(item.pos=='head'){
+                            if(Sticks[playerIndex].isPlayer){
+                                if(Sticks[playerIndex].head==''){
+                                    Sticks[playerIndex].head = item.name;
+                                    inventory[i] = ''
+                                }
+                                return true
                             }
-                            return
-                        }
-                    })
-                }
+                    }
             }
             return true;
         }
     }
+}
+
+function checkSpeelColision() {
+    Spells.forEach((Spell)=>{
+        Sticks.forEach((stick)=>{
+            if(stick.isPlayer||stick.friendFire==false) return;
+            x=stick.x
+            y=stick.y
+        
+            if (x >= Spell.x-10 && x <= Spell.x+10 && y >= Spell.y-20 && y <= Spell.y+20) {
+                stick.life-=Spell.damage
+                if(stick.life<=0){
+                    Sticks.splice(Sticks.indexOf(stick),1);
+                }
+                if(Spell.destroyable){
+                    Spells.splice(Spells.indexOf(Spell),1);
+                }
+            }
+        })
+    })
 }
 
 // Adicionar o ouvinte de eventos de clique
@@ -210,15 +325,53 @@ canvas.addEventListener('click', function (event) {
     if(invClick) return;
     let x = (event.offsetX)/scale+cameraX;
     let y = (event.offsetY)/scale+cameraY;
-    Sticks.forEach((Stick)=>{
-        if(Stick.isPlayer==false)return
-        Stick.targetX = x
-        Stick.targetY = y
+    Sticks.forEach((stick)=>{
+        if(stick.isPlayer==false)return
+        // new Spell('fireball',stick.x,stick.y).setSprite('X').setDamage(100).setLifeTime(10).goTo(x,y,5).create()
+        new Spell('fireball',stick.x+100,stick.y)
+        .setSprite('X')
+        .setDamage(1)
+        .setDestroyable(false)
+        .setLifeTime(100)
+        .goTo(x,y,8)
+        .create()
+        new Spell('fireball',stick.x-100,stick.y)
+        .setSprite('B')
+        .setDamage(1)
+        .setDestroyable(false)
+        .setLifeTime(100)
+        .goTo(x,y,8)
+        .create()
+        new Spell('fireball',stick.x,stick.y+100)
+        .setSprite('Y')
+        .setDamage(1)
+        .setDestroyable(false)
+        .setLifeTime(100)
+        .goTo(x,y,8)
+        .create()
+        new Spell('fireball',stick.x,stick.y-100)
+        .setSprite('A')
+        .setDamage(1)
+        .setDestroyable(false)
+        .setLifeTime(100)
+        .goTo(x,y,8)
+        .create()
     })
 });
+document.addEventListener("keydown",(e)=>{
+    console.log(e.key)
+    keys[e.key] = true
+    if(e.key=='e'){
+        isInvOpen = !isInvOpen
+    }
+})
+document.addEventListener("keyup",(e)=>{
+    keys[e.key] = false
+})
 resize()
 function gameLoop(){
     draw()
+    checkSpeelColision()
     stickMove()
     requestAnimationFrame(gameLoop)
 }

@@ -12,6 +12,7 @@ stickFracote.head = 'algo'
 stickFracote.chest = 'colete'
 stickFracote.hand = 'arma'
 stickFracote.life = '2'
+stickFracote.friendFire = false
 Sticks.push(stickFracote)
 
 let stickSoldado = new Stick(false,856,255,20,1,0)
