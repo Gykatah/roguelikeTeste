@@ -15,15 +15,16 @@ let keys = []
 let isInvOpen = false;
 let inventory = [
     'healPotion',
+    
     'daibo',
+    'cajado',
     'healPotion',
-    'healPotion',
     'helmet',
     'knife',
-    'helmet',
-    'knife',
-    'helmet',
-    'knife',
+    'star',
+    'star',
+    'star',
+    'superNova',
     'helmet',
     'knife',
     'helmet',
@@ -113,12 +114,21 @@ function draw(){
 
         
         if(ItemsHead[stick.head]){
+            if(ItemsHead[stick.head].everytick!=''){
+                ItemsHead[stick.head].everytick(stick)
+            }
             ctx.fillText(stick.isMoving==2?' '+ItemsHead[stick.head].text:''+ItemsHead[stick.head].text, stickPosX , headPos );
         }
-        if(ItemsChest[stick.chest]){
+        if(ItemsChest[stick.chest]&&ItemsHand[stick.hand]!=''){
+            if(ItemsChest[stick.chest].everytick!=''){
+                ItemsChest[stick.chest].everytick(stick)
+            }
             ctx.fillText(stick.isMoving==2?' '+ItemsChest[stick.chest].text:''+ItemsChest[stick.chest].text, stickPosX , chestPos );
         }
-        if(ItemsHand[stick.hand]){
+        if(ItemsHand[stick.hand]&&ItemsHand[stick.hand]!=''){
+            if(ItemsHand[stick.hand].everytick!=''){
+                ItemsHand[stick.hand].everytick(stick)
+            }
             ctx.fillText(stick.isMoving==2?' '+ItemsHand[stick.hand].text:''+ItemsHand[stick.hand].text, stickPosX , legPos );
         }
 
@@ -170,14 +180,11 @@ function draw(){
                 ctx.fillStyle = 'white';
                 ctx.font = '12px Arial';
                 let equipamentos = ['','','']
-                Sticks.forEach((stick)=>{
-                    if(stick.isPlayer==true){
-                        equipamentos[0]=stick.head;
-                        equipamentos[1]=stick.chest;
-                        equipamentos[2]=stick.hand;
-                    }})
-                    ctx.fillText(equipamentos[i], 115, 140+(i*49));
-                }
+                equipamentos[0]=Sticks[playerIndex].head;
+                equipamentos[1]=Sticks[playerIndex].chest;
+                equipamentos[2]=Sticks[playerIndex].hand;
+                ctx.fillText(equipamentos[i], 115, 140+(i*49));
+            }
             }
         }
     
@@ -193,8 +200,8 @@ function stickMove(){
             Spells.splice(Spells.indexOf(Spell),1);
         }
         if(Spell.targetX!=''&&Spell.targetY!=''){
-            const dx = Spell.targetX - Spell.x;
-            const dy = Spell.targetY - Spell.y;
+            const dx = Spell.targetX - Spell.x+0.01;
+            const dy = Spell.targetY - Spell.y+0.01;
             const distance = Math.sqrt(dx * dx + dy * dy);
             const directionX = dx / distance;
             const directionY = dy / distance;
@@ -240,7 +247,6 @@ function stickMove(){
             } else {
                 if(Stick.isFollowPlayer){
                     Sticks[playerIndex].life-=0.05
-                    console.log('damage', distance)
                 }
             }
         }
@@ -299,6 +305,10 @@ function checkItemClick(x, y) {
 
 function checkSpeelColision() {
     Spells.forEach((Spell)=>{
+        if(Spell.everytick!=''){
+            Spell.everytick(Spell)
+        }
+        if(Spell.damage==0)return
         Sticks.forEach((stick)=>{
             if(stick.isPlayer||stick.friendFire==false) return;
             x=stick.x
@@ -327,35 +337,32 @@ canvas.addEventListener('click', function (event) {
     let y = (event.offsetY)/scale+cameraY;
     Sticks.forEach((stick)=>{
         if(stick.isPlayer==false)return
-        // new Spell('fireball',stick.x,stick.y).setSprite('X').setDamage(100).setLifeTime(10).goTo(x,y,5).create()
-        new Spell('fireball',stick.x+100,stick.y)
-        .setSprite('X')
-        .setDamage(1)
-        .setDestroyable(false)
-        .setLifeTime(100)
-        .goTo(x,y,8)
-        .create()
-        new Spell('fireball',stick.x-100,stick.y)
-        .setSprite('B')
-        .setDamage(1)
-        .setDestroyable(false)
-        .setLifeTime(100)
-        .goTo(x,y,8)
-        .create()
-        new Spell('fireball',stick.x,stick.y+100)
-        .setSprite('Y')
-        .setDamage(1)
-        .setDestroyable(false)
-        .setLifeTime(100)
-        .goTo(x,y,8)
-        .create()
-        new Spell('fireball',stick.x,stick.y-100)
-        .setSprite('A')
-        .setDamage(1)
-        .setDestroyable(false)
-        .setLifeTime(100)
-        .goTo(x,y,8)
-        .create()
+            stick.spell(stick,x,y)
+        // for(let i = 0;i<4;i++){
+        //     let bx = i<2?100:-100;
+        //     let by = i%2==0?100:-100;
+        //     new Spell('fireball',stick.x,stick.y)
+        //     .setSprite('Y')
+        //     .setDamage(1)
+        //     .setDestroyable(false)
+        //     .setLifeTime(100)
+        //     .setEverytick((e)=>{
+        //         if(Math.floor(e.lifeTimeTicks/10)%2==0){
+        //             e.sprite='+'
+        //         }else{
+        //             e.sprite='x'
+        //         }
+        //         if(e.lifeTimeTicks==0){
+        //             e.goTo(stick.x+bx,stick.y+by,5)
+        //         }else if(e.lifeTimeTicks==15){
+        //             e.goTo('','',0)
+        //         }else if(e.lifeTimeTicks==40){
+        //             e.goTo(x,y,8)
+        //         }
+        //     })
+        //     .create()
+        // }
+        
     })
 });
 document.addEventListener("keydown",(e)=>{

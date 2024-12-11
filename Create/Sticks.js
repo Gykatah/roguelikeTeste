@@ -19,5 +19,5 @@ let stickSoldado = new Stick(false,856,255,20,1,0)
 stickSoldado.head = 'helmet'
 stickSoldado.chest = 'colete'
 stickSoldado.hand = 'arma'
-stickSoldado.life = '500'
+stickSoldado.life = '500000'
 Sticks.push(stickSoldado)

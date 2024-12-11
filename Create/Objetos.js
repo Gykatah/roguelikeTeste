@@ -9,6 +9,7 @@ class Stick{
             vision = vision || 0
             this.x = x,
             this.y = y,
+            this.spell = ()=>{}
             this.targetX = x,
             this.targetY = y,
             this.speed = speed,
@@ -33,6 +34,7 @@ class Item{
         this.text = text || ''
         this.consumable = false
         this.function = null
+        this.everytick = ''
     }
     setConsumable(bool){
         this.consumable = bool;
@@ -58,6 +60,11 @@ class Item{
         }
         return(this)
     }
+    
+    onEquiped(functionToLoad){
+        this.everytick=functionToLoad
+        return(this)
+    }
     createWithFunction(functionToLoad){
         this.function=functionToLoad
         Items[this.name]=this;
@@ -78,9 +85,19 @@ class Spell{
         this.dy = ''
         this.speed = 0
         this.sprite = 'O'
+        this.data = null
+        this.everytick = ''
     }
     setSprite(value){
         this.sprite = value || 'O'
+        return(this)
+    }
+    setData(value){
+        this.data = value || null
+        return(this)
+    }
+    setEverytick(value){
+        this.everytick = value || ''
         return(this)
     }
     setLifeTime(value){
@@ -88,7 +105,7 @@ class Spell{
         return(this)
     }
     setDamage(value){
-        this.damage = value || 1
+        this.damage = value || 0
         return(this)
     }
     setDestroyable(value){
