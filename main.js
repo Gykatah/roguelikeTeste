@@ -25,8 +25,8 @@ let inventory = [
     'star',
     'star',
     'superNova',
-    'helmet',
-    'knife',
+    'starFury',
+    'pá',
     'helmet',
     'knife',
     'helmet',
@@ -245,7 +245,7 @@ function stickMove(){
                 Stick.x += directionX * Stick.speed;
                 Stick.y += directionY * Stick.speed;
             } else {
-                if(Stick.isFollowPlayer){
+                if(Stick.isFollowPlayer&&Sticks[playerIndex].damageable){
                     Sticks[playerIndex].life-=0.05
                 }
             }
@@ -272,28 +272,22 @@ function checkItemClick(x, y) {
                     }
                     if(item.pos=='hand'){
                         if(Sticks[playerIndex].isPlayer){
-                            if(Sticks[playerIndex].hand==''){
-                                Sticks[playerIndex].hand = item.name;
-                                inventory[i] = ''
-                            }
+                            inventory[i] = Sticks[playerIndex].hand
+                            Sticks[playerIndex].hand = item.name;
                             return true
                         }
                     }
                     if(item.pos=='chest'){
                             if(Sticks[playerIndex].isPlayer){
-                                if(Sticks[playerIndex].chest==''){
-                                    Sticks[playerIndex].chest = item.name;
-                                    inventory[i] = ''
-                                }
+                                inventory[i] = Sticks[playerIndex].chest
+                                Sticks[playerIndex].chest = item.name;
                                 return true
                             }
                     }
                     if(item.pos=='head'){
                             if(Sticks[playerIndex].isPlayer){
-                                if(Sticks[playerIndex].head==''){
-                                    Sticks[playerIndex].head = item.name;
-                                    inventory[i] = ''
-                                }
+                                inventory[i] = Sticks[playerIndex].head
+                                Sticks[playerIndex].head = item.name;
                                 return true
                             }
                     }

@@ -21,6 +21,7 @@ class Stick{
             this.isMoving  =  0
             this.isPlayer  =  player
             this.isFollowPlayer  =  false
+            this.damageable  =  true
             this.vision = vision
             this.firstVision = vision
     }

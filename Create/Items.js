@@ -37,6 +37,74 @@ new Item('cajado').setSprite('O').onEquiped((stick)=>{
         }
     }
 }).createAt('hand')
+new Item('starFury').setSprite('+   +').onEquiped((stick)=>{
+    stick.spell = (stick,newx,newy)=>{
+        starDelta = Math.floor(Math.random()*2)-1;
+        if(starDelta==0){
+            starDelta=1
+        }
+        starDelta2 = Math.floor(Math.random()*2)-1;
+        if(starDelta2==0){
+            starDelta2=1
+        }
+        for(let i = 0;i<100;i++){
+            ypos = Math.floor(i/20)
+            starPos = Math.floor(Math.random()*1000);
+            let x = starPos
+            let y = (-1000*starDelta)-ypos*(-Math.floor(Math.random()*30))
+            if(starDelta2==-1){
+                x = (-1000*starDelta)-ypos*(-Math.floor(Math.random()*30))
+                y = starPos
+            }
+            new Spell('fireball',x,y)
+            .setSprite('x')
+            .setDamage(1)
+            .setDestroyable(true)
+            .setLifeTime(100)
+            .goTo(newx,newy,1000)
+            .setEverytick((e)=>{
+                if(Math.floor(e.lifeTimeTicks/10)%2==0){
+                    e.sprite='x'
+                }else{
+                    e.sprite='+'
+                }
+                if(e.y>0||e.y<1000||e.x>0||e.x<1000){
+                    e.speed = 30
+                }
+            })
+            .create()
+        }
+    }
+}).createAt('hand')
+new Item('pá').setSprite('/   \\').onEquiped((stick)=>{
+    stick.spell = (stick,newx,newy)=>{
+            new Spell('fireball',stick.x,stick.y)
+            .setSprite(' ')
+            .setDamage(20)
+            .setDestroyable(false)
+            .setLifeTime(20)
+            .setEverytick((e)=>{
+                    new Spell('icon',stick.x,stick.y).setSprite('/').setLifeTime(5).setDamage(0).create()
+                    const dx = newx - stick.x+0.01;
+                    const dy = newy - stick.y+0.01;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const directionX = dx / distance;
+                    const directionY = dy / distance;
+                    if(distance>20){
+                        stick.x+=directionX*20
+                        stick.y+=directionY*20
+                        e.x=stick.x
+                        e.y=stick.y
+                    }
+                    if(e.lifeTimeTicks<19){
+                        stick.damageable = false;
+                    }else{
+                        stick.damageable = true;
+                    }
+            })
+            .create()
+    }
+}).createAt('hand')
 new Item('horn').setSprite(' ` ´').createAt('head')
 new Item('helmet').setSprite(' ` ´').createAt('head')
 new Item('armor').setSprite(' ` ´').createAt('chest')
@@ -47,12 +115,8 @@ new Item('daibo').setConsumable(true).createWithFunction((stick)=>{
     for(let i = 0;i<100;i++){
         pos1 = Math.floor(Math.random()*1000);
         pos2 = Math.floor(Math.random()*1000);
-        new Stick(false,pos1,pos2,100,3,1000).create()
+        new Stick(false,pos1,pos2,100,1,1000).create()
     }
-    // new Stick(false,stick.x-100,stick.y-100,100,1,1000).create() 
-    // new Stick(false,stick.x+100,stick.y-100,100,1,1000).create()
-    // new Stick(false,stick.x-100,stick.y+100,100,1,1000).create()
-    // new Stick(false,stick.x+100,stick.y+100,100,1,1000).create()
 })
 new Item('star').setConsumable(true).createWithFunction(()=>{
     for(let i = 0;i<2000;i++){
@@ -80,7 +144,7 @@ new Item('star').setConsumable(true).createWithFunction(()=>{
     }
 })
 new Item('superNova').setConsumable(true).createWithFunction((stick)=>{
-    new Spell('icon',stick.x,stick.y).setSprite('☀').setLifeTime(700).setEverytick((e)=>{
+    new Spell('icon',stick.x,stick.y).setSprite('☀').setLifeTime(700).setDamage(0).setEverytick((e)=>{
         if(Math.floor(e.lifeTimeTicks/10)%2==0){
             e.sprite='🌟'
         }else{
