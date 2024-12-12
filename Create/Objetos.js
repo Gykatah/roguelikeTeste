@@ -15,6 +15,7 @@ class Stick{
             this.speed = speed,
             this.head = '',
             this.hand = '',
+            this.data = {},
             this.friendFire = true,
             this.chest = '',
             this.life = life,
@@ -34,6 +35,7 @@ class Item{
         this.name = name || 'air'
         this.text = text || ''
         this.consumable = false
+        this.data = {};
         this.function = null
         this.everytick = ''
     }
@@ -79,6 +81,7 @@ class Spell{
         this.lifeTimeTicks = 0;
         this.lifeTime = 100;
         this.damage = 1
+        this.damageSource = 'player'
         this.destroyable = false
         this.targetX = ''
         this.targetY = ''
@@ -86,7 +89,7 @@ class Spell{
         this.dy = ''
         this.speed = 0
         this.sprite = 'O'
-        this.data = null
+        this.data = {}
         this.everytick = ''
     }
     setSprite(value){
@@ -103,6 +106,10 @@ class Spell{
     }
     setLifeTime(value){
         this.lifeTime = value || 100
+        return(this)
+    }
+    setDamageSource(value){
+        this.damageSource = value || 100
         return(this)
     }
     setDamage(value){

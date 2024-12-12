@@ -51,7 +51,7 @@ function resize(){
     canvas.height = baseHeight * scale;
 }
 window.addEventListener('resize', resize);
-let playerIndex = Sticks.findIndex(item => item.isPlayer == true)
+playerIndex = Sticks.findIndex(item => item.isPlayer == true)
 function draw(){
     cameraX = playerX-baseWidth/2
     cameraY = playerY-baseHeight/2
@@ -195,9 +195,11 @@ FirstStick = null
 function stickMove(){
 
     Spells.forEach((Spell)=>{
-        Spell.lifeTimeTicks++
-        if(Spell.lifeTimeTicks>Spell.lifeTime){
-            Spells.splice(Spells.indexOf(Spell),1);
+        if(Spell.lifeTime!=-1){
+            Spell.lifeTimeTicks++
+            if(Spell.lifeTimeTicks>Spell.lifeTime){
+                Spells.splice(Spells.indexOf(Spell),1);
+            }
         }
         if(Spell.targetX!=''&&Spell.targetY!=''){
             const dx = Spell.targetX - Spell.x+0.01;
@@ -304,7 +306,9 @@ function checkSpeelColision() {
         }
         if(Spell.damage==0)return
         Sticks.forEach((stick)=>{
-            if(stick.isPlayer||stick.friendFire==false) return;
+            if((stick.isPlayer||stick.friendFire==false)&&Spell.damageSource=='player') return;
+            if((stick.isPlayer==false)&&Spell.damageSource=='enemy') return;
+            if((stick.friendFire==false)) return;
             x=stick.x
             y=stick.y
         

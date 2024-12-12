@@ -1,3 +1,5 @@
+let playerIndex = Sticks.findIndex(item => item.isPlayer == true)
+
 new Item('knife').setSprite('t').onEquiped((stick)=>{
     stick.spell = (stick,newx,newy)=>{
             new Spell('fireball',stick.x,stick.y)
@@ -9,6 +11,7 @@ new Item('knife').setSprite('t').onEquiped((stick)=>{
             .create()
     }
 }).createAt('hand')
+
 new Item('cajado').setSprite('O').onEquiped((stick)=>{
     stick.spell = (stick,newx,newy)=>{
         for(let i = 0;i<4;i++){
@@ -37,6 +40,7 @@ new Item('cajado').setSprite('O').onEquiped((stick)=>{
         }
     }
 }).createAt('hand')
+
 new Item('starFury').setSprite('+   +').onEquiped((stick)=>{
     stick.spell = (stick,newx,newy)=>{
         starDelta = Math.floor(Math.random()*2)-1;
@@ -76,6 +80,7 @@ new Item('starFury').setSprite('+   +').onEquiped((stick)=>{
         }
     }
 }).createAt('hand')
+
 new Item('pá').setSprite('/   \\').onEquiped((stick)=>{
     stick.spell = (stick,newx,newy)=>{
             new Spell('fireball',stick.x,stick.y)
@@ -105,12 +110,56 @@ new Item('pá').setSprite('/   \\').onEquiped((stick)=>{
             .create()
     }
 }).createAt('hand')
+
 new Item('horn').setSprite(' ` ´').createAt('head')
+
 new Item('helmet').setSprite(' ` ´').createAt('head')
+
 new Item('armor').setSprite(' ` ´').createAt('chest')
+
+new Item('bossArms').setSprite('<@>').onEquiped((stick)=>{
+    stick.data['bossArms'] = stick.data['bossArms'] || 0
+    stick.data['bossArms']+=1
+    if(stick.data['bossArms']>100){
+        stick.data['bossArms']=1
+        for(let i=-1;i<2;i+=2){
+            new Spell('fireball',-1000,-1000)
+            .setSprite('[]')
+            .setDamage(0.1)
+            .setDestroyable(true)
+            .setLifeTime(100)
+            .setDamageSource('enemy')
+            .setEverytick((e)=>{ 
+                const dx = Sticks[playerIndex].x - stick.x+0.01;
+                const dy = Sticks[playerIndex].y - stick.y+0.01;
+                const angle = Math.atan2(dy, dx);
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                if(distance>stick.vision||e.lifeTimeTicks<10){
+                    e.x=stick.x- Math.sin(angle) *(100*i)
+                    e.y=stick.y+ Math.cos(angle) *(100*i)
+                }else{
+                    new Spell('icon',e.x, e.y)
+                    .setDamageSource('enemy')
+                    .setSprite('[]').setLifeTime(100)
+                    .goTo(Sticks[playerIndex].x,Sticks[playerIndex].y,8)
+                    .setDamage(1)
+                    .create()
+                    console.log(e)
+                    Spells.splice(Spells.indexOf(e),1)
+                }
+            })
+            .create()
+        }
+
+    }else{
+        return
+    } 
+}).createAt('head')
+
 new Item('healPotion').setConsumable(true).createWithFunction((stick)=>{
     stick.life+=5
 })
+
 new Item('daibo').setConsumable(true).createWithFunction((stick)=>{
     for(let i = 0;i<100;i++){
         pos1 = Math.floor(Math.random()*1000);
@@ -118,6 +167,7 @@ new Item('daibo').setConsumable(true).createWithFunction((stick)=>{
         new Stick(false,pos1,pos2,100,1,1000).create()
     }
 })
+
 new Item('star').setConsumable(true).createWithFunction(()=>{
     for(let i = 0;i<2000;i++){
         ypos = Math.floor(i/20)
@@ -143,6 +193,7 @@ new Item('star').setConsumable(true).createWithFunction(()=>{
         .create()
     }
 })
+
 new Item('superNova').setConsumable(true).createWithFunction((stick)=>{
     new Spell('icon',stick.x,stick.y).setSprite('☀').setLifeTime(700).setDamage(0).setEverytick((e)=>{
         if(Math.floor(e.lifeTimeTicks/10)%2==0){
