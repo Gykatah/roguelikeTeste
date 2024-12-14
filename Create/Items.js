@@ -41,6 +41,42 @@ new Item('cajado').setSprite('O').onEquiped((stick)=>{
     }
 }).createAt('hand')
 
+new Item('cajadoV2').setSprite('O').onEquiped((stick)=>{
+    stick.spell = (stick,newx,newy)=>{
+        for(let i = 0;i<4;i++){
+            let bx = i<2?150:-150;
+            let by = i%2==0?150:-150;
+            new Spell('fireball',newx+bx,newy+by)
+            .setSprite(i==0||i==3?'O':'X')
+            .setDamage(1)
+            .setDestroyable(false)
+            .setLifeTime(100)
+            .setEverytick((e)=>{
+            console.log(e)
+            if(e.lifeTimeTicks>20){
+                if(Math.floor(e.lifeTimeTicks/20)%2==0){
+                    e.sprite='--'
+                }else if(Math.floor(e.lifeTimeTicks/10)%2==0){
+                    e.sprite='/'
+                }else if(Math.floor(e.lifeTimeTicks/5)%2==0){
+                    e.sprite='|'
+                }else{
+                    e.sprite='\\'
+                }
+                
+            }   
+            if(e.lifeTimeTicks>40){
+                e.y+=-40+e.lifeTimeTicks
+            }
+                if(e.lifeTimeTicks==0){
+                    e.goTo(newx,newy,8)
+                }
+            })
+            .create()
+        }
+    }
+}).createAt('hand')
+
 new Item('starFury').setSprite('+   +').onEquiped((stick)=>{
     stick.spell = (stick,newx,newy)=>{
         starDelta = Math.floor(Math.random()*2)-1;
@@ -119,38 +155,83 @@ new Item('armor').setSprite(' ` ´').createAt('chest')
 
 new Item('bossArms').setSprite('<@>').onEquiped((stick)=>{
     stick.data['bossArms'] = stick.data['bossArms'] || 0
-    stick.data['bossArms']+=1
-    if(stick.data['bossArms']>100){
+    stick.data['bossArms2'] = stick.data['bossArms2'] || 0
+    if(stick.isFollowPlayer){
+        stick.data['bossArms']+=1
+        stick.data['bossArms2']+=1
+    }
+    if(stick.data['bossArms2']>2000){
+        stick.data['bossArms2']=1
+    }
+    if(stick.data['bossArms']>40){
         stick.data['bossArms']=1
         for(let i=-1;i<2;i+=2){
-            new Spell('fireball',-1000,-1000)
-            .setSprite('[]')
-            .setDamage(0.1)
-            .setDestroyable(true)
-            .setLifeTime(100)
-            .setDamageSource('enemy')
-            .setEverytick((e)=>{ 
+            if(stick.data['bossArms2']<1000){
+                new Spell('fireball',-1000,-1000)
+                .setSprite('[]')
+                .setDamage(0.1)
+                .setDestroyable(true)
+                .setLifeTime(40)
+                .setDamageSource('enemy')
+                .setEverytick((e)=>{ 
+                    const dx = Sticks[playerIndex].x - stick.x+0.01;
+                    const dy = Sticks[playerIndex].y - stick.y+0.01;
+                    const angle = Math.atan2(dy, dx);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if(stick.data['bossArms2']>300){
+                        if(distance>stick.vision||e.lifeTimeTicks<10){
+                            e.x=stick.x- Math.sin(angle) *(100*i)
+                            e.y=stick.y+ Math.cos(angle) *(100*i)
+                        }else{
+                                new Spell('icon',e.x, e.y)
+                                .setDamageSource('enemy')
+                                .setSprite('[]').setLifeTime(100)
+                                .goTo(Sticks[playerIndex].x,Sticks[playerIndex].y,8)
+                                .setDamage(1)
+                                .create()
+                                console.log(e)
+                                Spells.splice(Spells.indexOf(e),1)
+                        }
+                    }else{
+                        if(stick.data['bossArms2']<200){
+                            e.x=stick.x- Math.sin(angle) *((100-stick.data['bossArms2'])*i)
+                            e.y=stick.y+ Math.cos(angle) *((100-stick.data['bossArms2'])*i)
+                        }else{
+                            e.x=stick.x- Math.sin(angle) *(100*i)
+                            e.y=stick.y+ Math.cos(angle) *(100*i)
+                        }
+                    }
+                })
+                .create()
+            }else if(stick.data['bossArms2']>1200){
                 const dx = Sticks[playerIndex].x - stick.x+0.01;
                 const dy = Sticks[playerIndex].y - stick.y+0.01;
-                const angle = Math.atan2(dy, dx);
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                if(distance>stick.vision||e.lifeTimeTicks<10){
-                    e.x=stick.x- Math.sin(angle) *(100*i)
-                    e.y=stick.y+ Math.cos(angle) *(100*i)
-                }else{
-                    new Spell('icon',e.x, e.y)
-                    .setDamageSource('enemy')
-                    .setSprite('[]').setLifeTime(100)
-                    .goTo(Sticks[playerIndex].x,Sticks[playerIndex].y,8)
+                
+                if(stick.isFollowPlayer){
+                    new Spell('fogo',stick.x,stick.y)
+                    .setSprite('()')
+                    .setDestroyable(true)
                     .setDamage(1)
+                    .setDamageSource('enemy')
+                    .goTo(Sticks[playerIndex].x,Sticks[playerIndex].y,7)
                     .create()
-                    console.log(e)
-                    Spells.splice(Spells.indexOf(e),1)
+                    new Spell('fogo',stick.x,stick.y)
+                    .setSprite('O')
+                    .setDestroyable(true)
+                    .setDamage(1)
+                    .setDamageSource('enemy')
+                    .goTo(Sticks[playerIndex].x,Sticks[playerIndex].y,5)
+                    .create()
+                    new Spell('fogo',stick.x,stick.y)
+                    .setSprite('o')
+                    .setDestroyable(true)
+                    .setDamage(1)
+                    .setDamageSource('enemy')
+                    .goTo(Sticks[playerIndex].x,Sticks[playerIndex].y,3)
+                    .create()
                 }
-            })
-            .create()
+            }
         }
-
     }else{
         return
     } 
@@ -164,7 +245,7 @@ new Item('daibo').setConsumable(true).createWithFunction((stick)=>{
     for(let i = 0;i<100;i++){
         pos1 = Math.floor(Math.random()*1000);
         pos2 = Math.floor(Math.random()*1000);
-        new Stick(false,pos1,pos2,100,1,1000).create()
+        new Stick(false,pos1,pos2,100,1,1).create()
     }
 })
 
@@ -230,4 +311,26 @@ new Item('superNova').setConsumable(true).createWithFunction((stick)=>{
         })
         .create()
     }
+})
+new Item('Varão').setConsumable(true).createWithFunction((stick)=>{
+    new Spell('varão',stick.x,stick.y)
+    .setSprite('O')
+    .setDamage(0)
+    .setDestroyable(false)
+    .setLifeTime(400)
+    .setEverytick((e)=>{
+        new Spell('fogo',e.x,e.y)
+        .setSprite('O>')
+        .setDestroyable(true)
+        .setDamage(1)
+        .setEverytick((fogo)=>{
+            const dx = stick.x - e.x+0.01;
+            const dy = stick.y - e.y+0.01;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            fogo.x-= 10*dx/distance
+            fogo.y-= 10*dy/distance
+        })
+        .create()
+    })
+    .create()
 })

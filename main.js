@@ -1,6 +1,5 @@
 const canvas = document.getElementById('game')
 const ctx = canvas.getContext('2d')
-console.log(Items)
 let baseWidth = 800;
 let baseHeight = 600;
 let scale = 600;
@@ -13,36 +12,18 @@ let cameraX = 0
 let cameraY = 0
 let keys = []
 let isInvOpen = false;
-let inventory = [
-    'healPotion',
-    
-    'daibo',
-    'cajado',
-    'healPotion',
-    'helmet',
-    'knife',
-    'star',
-    'star',
-    'star',
-    'superNova',
-    'starFury',
-    'pá',
-    'helmet',
-    'knife',
-    'helmet',
-    'knife',
-    'helmet',
-    'knife',
-    'helmet',
-    'knife',
-    'helmet',
-    'knife',
-    'helmet',
-    'knife',
-    'helmet',
-    'knife',
-    'helmet',
-]
+let inventory = new Array(35).fill('')
+console.log(inventory)
+giveItem('healPotion')
+giveItem('Varão')
+giveItem('daibo')
+giveItem('cajado')
+giveItem('cajadoV2')
+giveItem('helmet')
+giveItem('knife')
+giveItem('star')
+giveItem('pá')
+
 function resize(){
     let scaleWidth = window.innerWidth / baseWidth;
     let scaleHeight = window.innerHeight / baseHeight;
@@ -153,7 +134,7 @@ function draw(){
             ctx.fillStyle = 'white';
             ctx.font = '12px Arial';
             ctx.fillText(Items[inventory[i]].name, 115+(i*49) , 580);
-        }else if(inventory[i]!=''){
+        }else if(inventory[i]!=''&&inventory[i]!=null){
             ctx.fillStyle = 'red';
             ctx.font = '12px Arial';
             ctx.fillText('???', 115+(i*49) , 580);
@@ -162,9 +143,9 @@ function draw(){
     if(isInvOpen){
         ctx.fillStyle = 'white';
         ctx.fillRect(104,100,600,400)
-        for(let i = 7;i<35;i++){
-            let lineNumber = i%7
-            let lineCount = Math.floor(i/7)-1
+        for(let i = 12;i<35;i++){
+            let lineNumber = (i-5)%7
+            let lineCount = Math.floor((i-5)/7)-1
             ctx.fillStyle = 'black';
             ctx.fillRect(300+(lineNumber*49),110+(lineCount*49),48,48)
             if(Items[inventory[i]]){
@@ -297,6 +278,77 @@ function checkItemClick(x, y) {
             return true;
         }
     }
+    if(isInvOpen){
+        for (let i = 12;i<35;i++) {
+            const lineNumber = (i-5)%7
+            const lineCount = Math.floor((i-5)/7)-1
+            const itemX = 300 + (lineNumber * 49);
+            const itemY = 110+(lineCount*49);
+            const itemWidth = 48;
+            const itemHeight = 48;
+            if (x >= itemX && x <= itemX + itemWidth && y >= itemY && y <= itemY + itemHeight) {
+                let item = Items[inventory[i]]
+                if (item) {
+                        if(item.function!=null&&Sticks[playerIndex].isPlayer){
+                            item.function(Sticks[playerIndex])
+                            if(item.consumable){
+                                inventory[i] = ''
+                            }
+                        }
+                        if(item.pos=='hand'){
+                            if(Sticks[playerIndex].isPlayer){
+                                inventory[i] = Sticks[playerIndex].hand
+                                Sticks[playerIndex].hand = item.name;
+                                return true
+                            }
+                        }
+                        if(item.pos=='chest'){
+                                if(Sticks[playerIndex].isPlayer){
+                                    inventory[i] = Sticks[playerIndex].chest
+                                    Sticks[playerIndex].chest = item.name;
+                                    return true
+                                }
+                        }
+                        if(item.pos=='head'){
+                                if(Sticks[playerIndex].isPlayer){
+                                    inventory[i] = Sticks[playerIndex].head
+                                    Sticks[playerIndex].head = item.name;
+                                    return true
+                                }
+                        }
+                }
+                return true;
+            }
+        }
+        for (let i = 0;i<3;i++) {
+            const itemX = 110;
+            const itemY = 110+(i*49);
+            const itemWidth = 48;
+            const itemHeight = 48;
+            if (x >= itemX && x <= itemX + itemWidth && y >= itemY && y <= itemY + itemHeight) {
+                let item = ''
+                switch(i){
+                    case 0:
+                        item = Sticks[playerIndex].head
+                        Sticks[playerIndex].head = ''
+                        giveItem(item)
+                        break
+                    case 1:
+                        item = Sticks[playerIndex].chest
+                        Sticks[playerIndex].chest = ''
+                        giveItem(item)
+                        break
+                    case 2:
+                        item = Sticks[playerIndex].hand
+                        Sticks[playerIndex].hand = ''
+                        Sticks[playerIndex].spell = ''
+                        giveItem(item)
+                        break
+                }
+                return true;
+            }
+        }
+    }
 }
 
 function checkSpeelColision() {
@@ -336,34 +388,55 @@ canvas.addEventListener('click', function (event) {
     Sticks.forEach((stick)=>{
         if(stick.isPlayer==false)return
             stick.spell(stick,x,y)
-        // for(let i = 0;i<4;i++){
-        //     let bx = i<2?100:-100;
-        //     let by = i%2==0?100:-100;
-        //     new Spell('fireball',stick.x,stick.y)
-        //     .setSprite('Y')
-        //     .setDamage(1)
-        //     .setDestroyable(false)
-        //     .setLifeTime(100)
-        //     .setEverytick((e)=>{
-        //         if(Math.floor(e.lifeTimeTicks/10)%2==0){
-        //             e.sprite='+'
-        //         }else{
-        //             e.sprite='x'
-        //         }
-        //         if(e.lifeTimeTicks==0){
-        //             e.goTo(stick.x+bx,stick.y+by,5)
-        //         }else if(e.lifeTimeTicks==15){
-        //             e.goTo('','',0)
-        //         }else if(e.lifeTimeTicks==40){
-        //             e.goTo(x,y,8)
-        //         }
-        //     })
-        //     .create()
-        // }
-        
     })
 });
 document.addEventListener("keydown",(e)=>{
+    let keysHotbar={
+        '1':'0',
+        '2':1,
+        '3':2,
+        '4':3,
+        '5':4,
+        '6':5,
+        '7':6,
+        '8':7,
+        '9':8,
+        '0':9,
+        '-':10,
+        '=':11,
+    }
+    if(keysHotbar[e.key]){
+        let item = Items[inventory[keysHotbar[e.key]]]
+            if (item) {
+                    if(item.function!=null&&Sticks[playerIndex].isPlayer){
+                        item.function(Sticks[playerIndex])
+                        if(item.consumable){
+                            inventory[keysHotbar[e.key]] = ''
+                        }
+                    }
+                    if(item.pos=='hand'){
+                        if(Sticks[playerIndex].isPlayer){
+                            inventory[keysHotbar[e.key]] = Sticks[playerIndex].hand
+                            Sticks[playerIndex].hand = item.name;
+                            return true
+                        }
+                    }
+                    if(item.pos=='chest'){
+                            if(Sticks[playerIndex].isPlayer){
+                                inventory[keysHotbar[e.key]] = Sticks[playerIndex].chest
+                                Sticks[playerIndex].chest = item.name;
+                                return true
+                            }
+                    }
+                    if(item.pos=='head'){
+                            if(Sticks[playerIndex].isPlayer){
+                                inventory[keysHotbar[e.key]] = Sticks[playerIndex].head
+                                Sticks[playerIndex].head = item.name;
+                                return true
+                            }
+                    }
+            }
+    }
     console.log(e.key)
     keys[e.key] = true
     if(e.key=='e'){
@@ -374,10 +447,32 @@ document.addEventListener("keyup",(e)=>{
     keys[e.key] = false
 })
 resize()
-function gameLoop(){
-    draw()
-    checkSpeelColision()
-    stickMove()
-    requestAnimationFrame(gameLoop)
+let lastTime = 0;
+const interval = 1000 / 60; 
+
+function giveItem(item){
+    itemName = ''
+    if(typeof(item)=="object"){
+        itemName = item.name
+    }else{
+        itemName = item
+    }
+    for (let key = 0; key < inventory.length; key++) {
+        if(inventory[key]==''){
+            inventory[key]= itemName
+            break
+        }
+    }
+}
+
+function gameLoop(timestamp) {
+    const deltaTime = timestamp - lastTime;
+    if (deltaTime >= interval) {
+        lastTime = timestamp - (deltaTime % interval);
+        draw();
+        checkSpeelColision();
+        stickMove();
+    }
+    requestAnimationFrame(gameLoop);
 }
 gameLoop()

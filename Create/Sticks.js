@@ -4,7 +4,7 @@ let stickComUmaFacaTeste = new Stick(false,356,900,20,1,300)
 stickComUmaFacaTeste.head = 'bossArms'
 stickComUmaFacaTeste.chest = 'armor'
 stickComUmaFacaTeste.hand = 'knife'
-stickComUmaFacaTeste.life = '100'
+stickComUmaFacaTeste.life = '1000'
 Sticks.push(stickComUmaFacaTeste)
 
 let stickFracote = new Stick(false,252,246,20,1,0)
