@@ -1,6 +1,7 @@
 let playerIndex = Sticks.findIndex(item => item.isPlayer == true)
 
 new Item('knife').setSprite('t').onEquiped((stick)=>{
+    stick.setSpell('knife',1000,
     stick.spell = (stick,newx,newy)=>{
             new Spell('fireball',stick.x,stick.y)
             .setSprite('t')
@@ -9,11 +10,11 @@ new Item('knife').setSprite('t').onEquiped((stick)=>{
             .setLifeTime(10)
             .goTo(newx,newy,10)
             .create()
-    }
+    })
 }).createAt('hand')
 
 new Item('cajado').setSprite('O').onEquiped((stick)=>{
-    stick.spell = (stick,newx,newy)=>{
+    stick.setSpell('cajado',50,stick.spell = (stick,newx,newy)=>{
         for(let i = 0;i<4;i++){
             let bx = i<2?100:-100;
             let by = i%2==0?100:-100;
@@ -38,7 +39,7 @@ new Item('cajado').setSprite('O').onEquiped((stick)=>{
             })
             .create()
         }
-    }
+    })
 }).createAt('hand')
 
 new Item('cajadoV2').setSprite('O').onEquiped((stick)=>{

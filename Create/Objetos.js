@@ -10,6 +10,9 @@ class Stick{
             this.x = x,
             this.y = y,
             this.spell = ()=>{}
+            this.spellCD = [],
+            this.spellName = 'none',
+            this.spellCDTicks = [],
             this.targetX = x,
             this.targetY = y,
             this.speed = speed,
@@ -25,6 +28,12 @@ class Stick{
             this.damageable  =  true
             this.vision = vision
             this.firstVision = vision
+    }
+    setSpell(name,cd, spell){
+        this.spell = spell
+        this.spellCD[name] = cd 
+        this.spellName = name
+        return this
     }
     create(){
         Sticks.push(this)

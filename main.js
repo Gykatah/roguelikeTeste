@@ -19,10 +19,20 @@ giveItem('Varão')
 giveItem('daibo')
 giveItem('cajado')
 giveItem('cajadoV2')
+giveItem('superNova')
 giveItem('helmet')
 giveItem('knife')
 giveItem('star')
 giveItem('pá')
+giveItem('star')
+giveItem('star')
+giveItem('star')
+giveItem('star')
+giveItem('star')
+giveItem('star')
+giveItem('star')
+giveItem('star')
+giveItem('star')
 
 function resize(){
     let scaleWidth = window.innerWidth / baseWidth;
@@ -57,6 +67,15 @@ function draw(){
         if(stick.isPlayer==true){
             playerX = stick.x
             playerY = stick.y
+            let j = 0
+            for(let i in stick.spellCDTicks){
+                if(stick.spellCDTicks[i]>0){
+                    j++
+                    let text = stick.spellCDTicks[i].toString();  // Ensure the cooldown number is a string
+                    let textLength = ctx.measureText(text).width;
+                    ctx.fillText(text, baseWidth-textLength , 200+j*24 );
+                }
+            }
         }else{
             if(tick%5){
                 const dx = playerX - stick.x;
@@ -201,6 +220,11 @@ function stickMove(){
         const distance = Math.sqrt(dx * dx + dy * dy);
         let distanceLimite = 20
         if(Stick.isPlayer){
+            for(let i in Stick.spellCDTicks){
+                if(Stick.spellCDTicks[i]>0){
+                    Stick.spellCDTicks[i]--
+                }
+            }
             distanceLimite = 5
             if(keys['a']==true||keys['s']==true||keys['w']==true||keys['d']==true){
                 Stick.isMoving==0?Stick.isMoving = 2:''
@@ -229,7 +253,7 @@ function stickMove(){
                 Stick.y += directionY * Stick.speed;
             } else {
                 if(Stick.isFollowPlayer&&Sticks[playerIndex].damageable){
-                    Sticks[playerIndex].life-=0.05
+                    // Sticks[playerIndex].life-=0.05
                 }
             }
         }
@@ -352,20 +376,29 @@ function checkItemClick(x, y) {
 }
 
 function checkSpeelColision() {
-    Spells.forEach((Spell)=>{
-        if(Spell.everytick!=''){
-            Spell.everytick(Spell)
+    Spells.forEach((spell)=>{
+        if(spell.everytick!=''){
+            spell.everytick(spell)
         }
-        if(Spell.damage==0)return
+        if(spell.damage==0)return
         Sticks.forEach((stick)=>{
-            if((stick.isPlayer||stick.friendFire==false)&&Spell.damageSource=='player') return;
-            if((stick.isPlayer==false)&&Spell.damageSource=='enemy') return;
+            if((stick.isPlayer||stick.friendFire==false)&&spell.damageSource=='player') return;
+            if((stick.isPlayer==false)&&spell.damageSource=='enemy') return;
             if((stick.friendFire==false)) return;
             x=stick.x
             y=stick.y
         
-            if (x >= Spell.x-10 && x <= Spell.x+10 && y >= Spell.y-20 && y <= Spell.y+20) {
-                stick.life-=Spell.damage
+            if (x >= spell.x-10 && x <= spell.x+10 && y >= spell.y-20 && y <= spell.y+20) {
+                stick.life-=spell.damage
+                new Spell('fireball',stick.x+Math.floor(Math.random()*50)-25,stick.y+Math.floor(Math.random()*50)-25)
+                .setSprite(spell.damage)
+                .setDamage(0)
+                .setDestroyable(false)
+                .setLifeTime(40)
+                .setEverytick((e)=>{
+                    e.y-= 1
+                })
+                .create()
                 if(stick.life<=0){
                     Sticks.splice(Sticks.indexOf(stick),1);
                 }
@@ -387,6 +420,12 @@ canvas.addEventListener('click', function (event) {
     let y = (event.offsetY)/scale+cameraY;
     Sticks.forEach((stick)=>{
         if(stick.isPlayer==false)return
+        if(stick.spellCDTicks[stick.spellName]>0){
+            return
+        }
+        if(stick.spellCD[stick.spellName]){
+            stick.spellCDTicks[stick.spellName] = stick.spellCD[stick.spellName]
+        }
             stick.spell(stick,x,y)
     })
 });
