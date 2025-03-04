@@ -1,7 +1,9 @@
 Sticks.push(new Stick(true,500,500,20,3))
 
 let stickComUmaFacaTeste = new Stick(false,356,900,20,1,300)
-stickComUmaFacaTeste.head = 'bossArms'
+stickComUmaFacaTeste.head = '
+
+'
 stickComUmaFacaTeste.chest = 'armor'
 stickComUmaFacaTeste.hand = 'knife'
 stickComUmaFacaTeste.life = '1000'

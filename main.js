@@ -10,11 +10,12 @@ let playerX = 0
 let playerY = 0
 let cameraX = 0
 let cameraY = 0
+let damageTotal = 0
 let keys = []
 let isInvOpen = false;
 let inventory = new Array(35).fill('')
 console.log(inventory)
-giveItem('healPotion')
+giveItem('NewConjure')
 giveItem('Varão')
 giveItem('daibo')
 giveItem('cajado')
@@ -68,12 +69,15 @@ function draw(){
             playerX = stick.x
             playerY = stick.y
             let j = 0
+            let text = ' '+(damageTotal).toString();  // Ensure the cooldown number is a string
+            let textLength = ctx.measureText(text).width;
+            ctx.fillText(text, baseWidth-textLength-4 , 200-24 );
             for(let i in stick.spellCDTicks){
                 if(stick.spellCDTicks[i]>0){
                     j++
-                    let text = stick.spellCDTicks[i].toString();  // Ensure the cooldown number is a string
-                    let textLength = ctx.measureText(text).width;
-                    ctx.fillText(text, baseWidth-textLength , 200+j*24 );
+                    let text2 = i+' '+(stick.spellCDTicks[i]).toString();  // Ensure the cooldown number is a string
+                    let textLength2 = ctx.measureText(text).width;
+                    ctx.fillText(text2, baseWidth-textLength2-4 , 200+j*24 );
                 }
             }
         }else{
@@ -390,6 +394,7 @@ function checkSpeelColision() {
         
             if (x >= spell.x-10 && x <= spell.x+10 && y >= spell.y-20 && y <= spell.y+20) {
                 stick.life-=spell.damage
+                damageTotal += spell.damage
                 new Spell('fireball',stick.x+Math.floor(Math.random()*50)-25,stick.y+Math.floor(Math.random()*50)-25)
                 .setSprite(spell.damage)
                 .setDamage(0)

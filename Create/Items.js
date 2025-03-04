@@ -246,7 +246,7 @@ new Item('daibo').setConsumable(true).createWithFunction((stick)=>{
     for(let i = 0;i<100;i++){
         pos1 = Math.floor(Math.random()*1000);
         pos2 = Math.floor(Math.random()*1000);
-        new Stick(false,pos1,pos2,100,1,1).create()
+        new Stick(false,pos1,pos2,20,1,300).create()
     }
 })
 
@@ -335,3 +335,52 @@ new Item('Varão').setConsumable(true).createWithFunction((stick)=>{
     })
     .create()
 })
+
+new Item('NewConjure').setSprite('☀').onEquiped((stick)=>{
+    stick.setSpell('cajado',50,stick.spell = (stick,newx,newy)=>{
+        for(let i = 0;i<40;i++){
+            new Spell('fireball',stick.x,stick.y)
+            .setSprite('( )')
+            .setDamage(1)
+            .setDestroyable(true)
+            .setLifeTime(40+i)
+            .setEverytick((e)=>{
+                if(e.lifeTimeTicks-i<10){
+                    e.setSprite('O')
+                }
+                else if(e.lifeTimeTicks-i<20){
+                    e.setSprite('o')
+                }
+                else if(e.lifeTimeTicks-i<30){
+                    e.setSprite('°')
+                }
+                if(e.lifeTimeTicks==i){
+                    e.goTo(newx,newy,8)
+                }
+            })
+            .create()
+        }
+        for(let i = 0;i<40;i++){
+            new Spell('fireball',stick.x,stick.y)
+            .setSprite('( )')
+            .setDamage(1)
+            .setDestroyable(true)
+            .setLifeTime(40+i)
+            .setEverytick((e)=>{
+                if(e.lifeTimeTicks-i<10){
+                    e.setSprite('O')
+                }
+                else if(e.lifeTimeTicks-i<20){
+                    e.setSprite('o')
+                }
+                else if(e.lifeTimeTicks-i<30){
+                    e.setSprite('°')
+                }
+                if(e.lifeTimeTicks==i){
+                    e.goTo(newx,newy,-8)
+                }
+            })
+            .create()
+        }
+    })
+}).createAt('hand')
